@@ -1,0 +1,41 @@
+// Prisma schema for the Quiz Builder app.
+// Using SQLite for a zero-config local setup; swap the datasource to
+// "postgresql" + a DATABASE_URL if you'd rather run against Postgres.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// NOTE: SQLite (via Prisma) has no native enum type, so `Question.type` is
+// stored as a String and constrained to "BOOLEAN" | "INPUT" | "CHECKBOX" at
+// the application layer via Zod (see src/validation.ts). Switching the
+// datasource to PostgreSQL would allow promoting this to a real Prisma enum.
+
+model Quiz {
+  id        String     @id @default(uuid())
+  title     String
+  createdAt DateTime   @default(now())
+  questions Question[]
+}
+
+model Question {
+  id      String  @id @default(uuid())
+  text    String
+  // "BOOLEAN" | "INPUT" | "CHECKBOX" (validated by Zod; SQLite has no enums)
+  type    String
+  // For BOOLEAN: "true" | "false"
+  // For INPUT: the expected answer text
+  // For CHECKBOX: JSON-stringified array of correct option strings
+  answer  String
+  // For CHECKBOX: JSON-stringified array of all selectable options.
+  // Null for BOOLEAN and INPUT questions.
+  options String?
+  order   Int     @default(0)
+  quiz    Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId  String
+}

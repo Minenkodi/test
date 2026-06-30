@@ -1,0 +1,11 @@
+# OS / editor junk
+.DS_Store
+*.log
+
+# Safety net — env files are also ignored in backend/ and frontend/
+.env
+.env.local
+*.env
+
+# Local test/automation artifacts
+.playwright-mcp/
